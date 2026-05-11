@@ -1,12 +1,12 @@
 from Seguridad.Usuarios_json import cargar_usuarios, guardar_usuarios
+from Seguridad.Validacion import validar_texto_obligatorio
 
 
 def agregar_usuario():
     print("\n=== AGREGAR USUARIO ===")
     nombre_usuario = input("Usuario: ").strip()
 
-    if not nombre_usuario:
-        print("El usuario no puede estar vacio.")
+    if not validar_texto_obligatorio(nombre_usuario, "Usuario"):
         return
 
     usuarios = cargar_usuarios()
@@ -17,13 +17,13 @@ def agregar_usuario():
             return
 
     clave = input("Clave: ").strip()
-    if not clave:
-        print("La clave no puede estar vacia.")
+    if not validar_texto_obligatorio(clave, "Clave"):
         return
 
     rol = input("Rol (admin/usuario): ").strip().lower()
     if rol not in ("admin", "usuario"):
-        rol = "usuario"
+        print("Rol invalido. Use admin o usuario.")
+        return
 
     usuarios.append(
         {

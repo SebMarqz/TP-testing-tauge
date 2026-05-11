@@ -7,7 +7,7 @@ from Clientes.Mostrar_clientes import mostrar_clientes
 
 def menu_clientes():
     while True:
-        print("\n=== MENÚ CLIENTES ===")
+        print("\n=== MENU CLIENTES ===")
         print("1. Mostrar clientes")
         print("2. Agregar cliente")
         print("3. Buscar cliente")
@@ -15,7 +15,7 @@ def menu_clientes():
         print("5. Eliminar cliente")
         print("0. Volver")
 
-        opcion = input("Ingrese opción: ").strip()
+        opcion = input("Ingrese opcion: ").strip()
 
         if opcion == "1":
             mostrar_clientes()
@@ -30,4 +30,4 @@ def menu_clientes():
         elif opcion == "0":
             break
         else:
-            print("Opción inválida.")
+            print("Opcion invalida.")

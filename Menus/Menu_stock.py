@@ -1,20 +1,17 @@
-from Menus.Menu_clientes import menu_clientes
-from Menus.Menu_pedidos import menu_pedidos
-from Menus.Menu_usuario import menu_usuario
 from Stock.Mostrar_stock import mostrar_stock
 from Stock.Agregar_stock import agregar_stock
 from Stock.Quitar_stock import quitar_stock
 
-def menu_stock():
 
+def menu_stock():
     while True:
-        print("\n=== MENÚ STOCK ===")
+        print("\n=== MENU STOCK ===")
         print("1. Mostrar stock")
         print("2. Agregar stock")
         print("3. Quitar stock")
         print("0. Volver")
 
-        opcion = input("Ingrese opción: ").strip()
+        opcion = input("Ingrese opcion: ").strip()
 
         if opcion == "1":
             mostrar_stock()
@@ -25,4 +22,4 @@ def menu_stock():
         elif opcion == "0":
             break
         else:
-            print("Opción inválida.")
+            print("Opcion invalida.")

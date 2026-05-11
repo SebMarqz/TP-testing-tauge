@@ -1,34 +1,25 @@
-import json
-import os
+from Clientes.Clientes_json import (
+    buscar_cliente_por_id,
+    cargar_clientes,
+    guardar_clientes,
+)
 
-# Configuramos la ruta dinámica absoluta
-DIR_CLIENTES = os.path.dirname(os.path.abspath(__file__))
-DIR_RAIZ = os.path.dirname(DIR_CLIENTES)
-RUTA_JSON = os.path.join(DIR_RAIZ, 'clientes.json')
 
-def eliminar_cliente(id_cliente):
-    """Elimina un cliente del JSON mediante su ID."""
-    if not os.path.exists(RUTA_JSON):
-        return False
+def eliminar_cliente():
+    print("\n=== ELIMINAR CLIENTE ===")
+    cliente_id = input("ID del cliente: ").strip()
 
-    ruta_temp = os.path.join(DIR_RAIZ, 'clientes_temp.json')
-    eliminado = False
+    if not cliente_id.isdigit():
+        print("El ID debe ser numerico.")
+        return
 
-    with open(RUTA_JSON, 'r', encoding='utf-8') as archivo_lectura, \
-         open(ruta_temp, 'w', encoding='utf-8') as archivo_escritura:
-         
-        for linea in archivo_lectura:
-            if linea.strip():
-                cliente = json.loads(linea.strip())
-                
-                # Si es el que queremos eliminar, NO lo copiamos
-                if cliente["id_cliente"] == id_cliente:
-                    eliminado = True
-                    continue 
-                
-                # Si no es, lo copiamos al archivo temporal
-                archivo_escritura.write(linea)
+    clientes = cargar_clientes()
+    cliente = buscar_cliente_por_id(clientes, int(cliente_id))
 
-    # Reemplazamos el archivo viejo por el nuevo
-    os.replace(ruta_temp, RUTA_JSON)
-    return eliminado
+    if not cliente:
+        print("No existe un cliente con ese ID.")
+        return
+
+    clientes.remove(cliente)
+    guardar_clientes(clientes)
+    print("Cliente eliminado correctamente.")

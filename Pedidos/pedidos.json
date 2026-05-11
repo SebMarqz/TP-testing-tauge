@@ -1,0 +1,11 @@
+[
+    {
+        "id": 1,
+        "cliente": "1",
+        "descripcion": "1",
+        "fecha_estimada": "15/15/2026",
+        "tipo_trabajo": "Impresion simple",
+        "estado": "Cancelado",
+        "pago": "Pagado"
+    }
+]

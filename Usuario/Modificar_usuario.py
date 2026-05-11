@@ -1,4 +1,5 @@
 from Seguridad.Usuarios_json import cargar_usuarios, guardar_usuarios
+from Seguridad.Validacion import validar_texto_obligatorio
 
 
 def modificar_usuario():
@@ -18,6 +19,8 @@ def modificar_usuario():
 
     nuevo_nombre = input("Nuevo usuario (enter para mantener): ").strip()
     if nuevo_nombre and nuevo_nombre != nombre_usuario:
+        if not validar_texto_obligatorio(nuevo_nombre, "Usuario"):
+            return
         for usuario in usuarios:
             if usuario.get("usuario") == nuevo_nombre:
                 print("Ya existe un usuario con ese nombre.")

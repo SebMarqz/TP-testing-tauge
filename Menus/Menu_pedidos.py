@@ -4,11 +4,12 @@ from Pedidos.Modificar_pedido import modificar_pedido
 from Pedidos.Eliminar_pedido import eliminar_pedido
 from Pedidos.Mostrar_pedidos import mostrar_pedidos
 from Pedidos.Estado_pedido import cambiar_estado_pedido
+from Pedidos.Pago_pedidos import registrar_pago_pedido
 
 
 def menu_pedidos():
     while True:
-        print("\n=== MENÚ PEDIDOS ===")
+        print("\n=== MENU PEDIDOS ===")
         print("1. Mostrar pedidos")
         print("2. Agregar pedido")
         print("3. Buscar pedido")
@@ -18,7 +19,7 @@ def menu_pedidos():
         print("7. Registrar pago")
         print("0. Volver")
 
-        opcion = input("Ingrese opción: ").strip()
+        opcion = input("Ingrese opcion: ").strip()
 
         if opcion == "1":
             mostrar_pedidos()
@@ -37,8 +38,4 @@ def menu_pedidos():
         elif opcion == "0":
             break
         else:
-            print("Opción inválida.")
-
-
-def registrar_pago_pedido():
-    print("\nFunción pendiente: registrar pago de pedido.")
+            print("Opcion invalida.")
