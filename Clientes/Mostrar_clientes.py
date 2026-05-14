@@ -1,14 +1,14 @@
-from Clientes.Clientes_json import cargar_clientes, mostrar_cliente
+import requests
+from API.api_client import BASE_URL, headers_auth
 
 
 def mostrar_clientes():
-    print("\n=== LISTADO DE CLIENTES ===")
-    clientes = cargar_clientes()
-
-    if not clientes:
-        print("No hay clientes registrados.")
+    response=requests.get(f'{BASE_URL}/clientes',headers=headers_auth())
+    if response.status_code!=200:
+        print('Error al obtener clientes')
+        print(response.text)
         return
-
-    for cliente in clientes:
-        mostrar_cliente(cliente)
-        print("-" * 30)
+    clientes=response.json()
+    print('\n=== CLIENTES ===')
+    for c in clientes:
+        print(c)

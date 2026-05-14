@@ -1,18 +1,18 @@
-from Seguridad.Usuarios_json import buscar_usuario
+from API.api_client import login as api_login
 
 
 def login():
-    print("\n=== LOGIN ===")
-    nombre_usuario = input("Usuario: ").strip()
-    clave = input("Clave: ").strip()
-    usuario = buscar_usuario(nombre_usuario)
+    print('\n=== LOGIN ===')
+    nombre_usuario=input('Usuario: ').strip()
+    clave=input('Clave: ').strip()
 
-    if usuario and usuario.get("clave") == clave:
+    usuario=api_login(nombre_usuario,clave)
+
+    if usuario:
         return {
-            "usuario": usuario.get("usuario"),
-            "rol": usuario.get("rol", "usuario"),
+            'usuario': usuario.get('usuario'),
+            'rol': usuario.get('rol','usuario')
         }
 
-    print("Usuario o clave incorrectos.")
-
+    print('Usuario o clave incorrectos.')
     return None
