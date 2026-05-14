@@ -60,15 +60,33 @@ pip install -r requirements.txt
 
 ---
 
-# 5. Ejecutar el proyecto
+# 5. Ejecutar la API REST
 
 ```bash
 uvicorn Main:app --reload
 ```
 
+La API quedará disponible en:
+
+```text
+http://127.0.0.1:8000
+```
+
 ---
 
-# 6. Abrir Swagger
+# 6. Ejecutar el cliente de terminal
+
+Abrir una segunda terminal, activar nuevamente el venv y ejecutar:
+
+```bash
+python ClienteTerminal.py
+```
+
+El cliente de terminal se conectará automáticamente a la REST API mediante requests HTTP.
+
+---
+
+# 7. Abrir Swagger
 
 Abrir en el navegador:
 
@@ -78,7 +96,7 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# 7. Login de prueba
+# 8. Login de prueba
 
 Usuario:
 
@@ -94,7 +112,7 @@ Contraseña:
 
 ---
 
-# 8. Autorizar endpoints
+# 9. Autorizar endpoints
 
 ## Hacer login
 
@@ -119,9 +137,32 @@ La API devuelve un token.
 
 ## Usar token
 
-En la seccion de auth pegar el token recibido por ej:
+En la sección de auth pegar el token recibido, por ejemplo:
 
 ```text
 fake-token-admin
 ```
+
 ---
+
+# 10. Verificar integración terminal + API
+
+Con la API ejecutándose, usar el programa de terminal para:
+
+* Mostrar clientes
+* Agregar clientes
+* Buscar clientes
+* Modificar clientes
+* Eliminar clientes
+
+Mientras se usa el cliente de terminal, en la consola de uvicorn aparecerán requests como:
+
+```text
+POST /login
+GET /clientes
+POST /clientes
+PUT /clientes/1
+DELETE /clientes/1
+```
+
+Eso confirma que el programa de terminal está consumiendo la REST API correctamente.
