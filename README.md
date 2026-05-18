@@ -32,16 +32,10 @@ python3 -m venv venv
 
 # 3. Activar entorno virtual
 
-## Windows CMD
+## Windows
 
 ```bash
 venv\Scripts\activate
-```
-
-## Windows PowerShell
-
-```powershell
-.\venv\Scripts\Activate.ps1
 ```
 
 ## Linux / macOS
@@ -63,6 +57,7 @@ pip install -r requirements.txt
 # 5. Ejecutar la API REST
 
 ```bash
+cd TP-testing-tauge-restapi
 uvicorn Main:app --reload
 ```
 
