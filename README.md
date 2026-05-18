@@ -57,7 +57,7 @@ pip install -r requirements.txt
 # 5. Ejecutar la API REST
 
 ```bash
-cd TP-testing-tauge-restapi
+cd restapi
 uvicorn Main:app --reload
 ```
 
