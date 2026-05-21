@@ -29,23 +29,14 @@ class PedidoItem(BaseModel):
     cantidad: int
 
 class Pedido(BaseModel):
-
-    id: int
-
-    cliente_id: int
-
-    descripcion: str
-
+    id: int = 0
+    cliente_id: int = 0
+    descripcion: str = ""
     tipo_trabajo: str
-
     fecha_estimada: str
-
     estado: str = "Pendiente"
-
     estado_pago: str = "Pendiente"
-
     insumos: List[PedidoItem] = []
-
     fecha_creacion: str = datetime.now().strftime(
         "%Y-%m-%d %H:%M:%S"
     )

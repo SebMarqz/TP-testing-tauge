@@ -10,27 +10,26 @@ def agregar_usuario(usuario: Usuario, user = Depends(verificar_usuario)):
     if usuario.username in usuarios_db:
         raise HTTPException(status_code=400, detail="Usuario ya existe")
     
-    usuarios_db[usuario.username] = usuario.dict()
+    nuevo_user_dict = usuario.dict()
+    nuevo_user_dict["rol"] = "Administrador"
+    
+    usuarios_db[usuario.username] = nuevo_user_dict
     guardar_usuarios()
     return {"mensaje": "Usuario agregado"}
 
 @router.put("/usuarios/{username}", tags=["Usuarios"])
 def modificar_usuario(username: str, nuevo_usuario: Usuario, user = Depends(verificar_usuario)):
-    if username not in usuarios_db:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
     usuarios_db[username] = nuevo_usuario.dict()
     guardar_usuarios()
     return {"mensaje": "Usuario modificado"}
 
 @router.delete("/usuarios/{username}", tags=["Usuarios"])
 def eliminar_usuario(username: str, user = Depends(verificar_usuario)):
-    if username not in usuarios_db:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
     if username == "admin":
         raise HTTPException(status_code=400, detail="No se puede eliminar el usuario administrador por defecto")
         
-    del usuarios_db[username]
+    if username in usuarios_db:
+        del usuarios_db[username]
+        
     guardar_usuarios()
     return {"mensaje": "Usuario eliminado"}
