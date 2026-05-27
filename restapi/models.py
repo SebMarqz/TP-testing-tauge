@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional, List
-from datetime import datetime
 
 class LoginModel(BaseModel):
     username: str
@@ -30,13 +29,9 @@ class PedidoItem(BaseModel):
 
 class Pedido(BaseModel):
     id: int = 0
-    cliente_id: int = 0
-    descripcion: str = ""
-    tipo_trabajo: str
+    cliente_id: int
+    descripcion: str
     fecha_estimada: str
     estado: str = "Pendiente"
     estado_pago: str = "Pendiente"
     insumos: List[PedidoItem] = []
-    fecha_creacion: str = datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
