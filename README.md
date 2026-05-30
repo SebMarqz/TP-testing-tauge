@@ -3,7 +3,8 @@
 ## 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/TU_USUARIO/TP_TESTING_TAUGE.git
+git clone https://github.com/SebMarqz/TP-testing-tauge.git
+git checkout integrado
 ```
 
 Entrar a la carpeta:
