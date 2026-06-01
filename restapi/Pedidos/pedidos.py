@@ -103,6 +103,32 @@ def cambiar_estado(pedido_id: int, nuevo_estado: str, user = Depends(verificar_u
             return {"mensaje": "Estado actualizado", "nuevo_estado": pedido.estado}
 
     raise HTTPException(status_code=404, detail="Pedido no encontrado")
+    
+@router.put("/pedidos/{pedido_id}/estado_pago", tags=["Pedidos"])
+def cambiar_estado_pago(pedido_id: int, nuevo_estado: str, user = Depends(verificar_usuario)):
+    logger.info(f"Usuario '{user['username']}' intentando cambiar el estado de pago del pedido ID {pedido_id}.")
+    
+    # Validamos estrictamente que solo se puedan ingresar estos dos estados
+    if nuevo_estado not in ["Pagado", "Pendiente"]:
+        logger.warning(f"Intento fallido: '{nuevo_estado}' no es un estado de pago válido.")
+        raise HTTPException(
+            status_code=400,
+            detail="Estado de pago inválido. Los únicos valores permitidos son 'Pagado' o 'Pendiente'."
+        )
+
+    for pedido in pedidos_db:
+        if pedido.id == pedido_id:
+            pedido.estado_pago = nuevo_estado
+            guardar_pedidos()  # Guardamos el cambio en pedidos.json
+            
+            logger.info(f"Pedido ID {pedido_id} fue marcado como pago '{nuevo_estado}' por el usuario '{user['username']}'.")
+            return {
+                "mensaje": "Estado de pago actualizado", 
+                "nuevo_estado_pago": pedido.estado_pago
+            }
+
+    logger.error(f"Intento fallido de cambiar pago: Pedido ID {pedido_id} no existe.")
+    raise HTTPException(status_code=404, detail="Pedido no encontrado")
 
 @router.delete("/pedidos/{pedido_id}", tags=["Pedidos"])
 def cancelar_pedido(pedido_id: int, user = Depends(verificar_usuario)):
