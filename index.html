@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tauge API - Panel Completo</title>
+    <style>
+        :root { --primary: #007bff; --danger: #dc3545; --success: #28a745; --warning: #ffc107; --dark: #343a40; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f4f6f9; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        
+        /* Utilidades */
+        .msg { padding: 10px; margin-bottom: 15px; border-radius: 4px; display: none; }
+        .msg.error { background: #f8d7da; color: #721c24; display: block; }
+        .msg.success { background: #d4edda; color: #155724; display: block; }
+
+        /* Navegación */
+        nav { display: flex; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #eee; }
+        nav button { background: var(--dark); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        nav button.active { background: var(--primary); }
+        nav button:hover { opacity: 0.9; }
+
+        /* Botones generales */
+        button { cursor: pointer; padding: 6px 12px; border: none; border-radius: 4px; color: white; font-size: 14px; }
+        .btn-primary { background: var(--primary); }
+        .btn-danger { background: var(--danger); }
+        .btn-success { background: var(--success); }
+        .btn-warning { background: var(--warning); color: #000; }
+
+        /* Formularios */
+        .form-panel { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; }
+        .form-group { flex: 1; min-width: 200px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 10px; border: 1px solid #dee2e6; text-align: left; }
+        th { background-color: var(--dark); color: white; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        .actions-cell { display: flex; gap: 5px; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Tauge System Dashboard</h1>
+        <div id="user-info" class="hidden">
+            <span id="welcome-text" style="font-weight: bold; margin-right: 15px;"></span>
+            <button class="btn-danger" onclick="logout()" id="btn-logout">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div id="global-msg" class="msg"></div>
+
+    <div id="view-login" class="form-panel" style="max-width: 400px; margin: 0 auto;">
+        <h2>Iniciar Sesión</h2>
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Usuario</label>
+            <input type="text" id="login-user" value="admin">
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Contraseña</label>
+            <input type="password" id="login-pass" value="123">
+        </div>
+        <button class="btn-primary" onclick="login()" style="width: 100%; padding: 10px;">Ingresar</button>
+    </div>
+
+    <div id="view-app" class="hidden">
+        <nav>
+            <button id="tab-pedidos" onclick="showTab('pedidos')">📦 Pedidos</button>
+            <button id="tab-clientes" onclick="showTab('clientes')">👥 Clientes</button>
+            <button id="tab-stock" onclick="showTab('stock')">🏭 Stock</button>
+            <button id="tab-usuarios" onclick="showTab('usuarios')">🔐 Usuarios (Admin)</button>
+        </nav>
+
+        <div id="sec-clientes" class="seccion hidden">
+            <div class="form-panel">
+                <h3 id="cliente-form-title">Nuevo Cliente</h3>
+                <input type="hidden" id="c-mode" value="create">
+                <div class="form-row">
+                    <div class="form-group"><label>ID</label><input type="number" id="c-id"></div>
+                    <div class="form-group"><label>Nombre</label><input type="text" id="c-nombre"></div>
+                    <div class="form-group"><label>Teléfono</label><input type="text" id="c-telefono"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="c-email"></div>
+                </div>
+                <button class="btn-success" onclick="guardarCliente()">Guardar Cliente</button>
+                <button class="btn-warning" onclick="resetFormCliente()">Limpiar</button>
+            </div>
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Email</th><th>Acciones</th></tr></thead>
+                <tbody id="tbody-clientes"></tbody>
+            </table>
+        </div>
+
+        <div id="sec-stock" class="seccion hidden">
+            <div class="form-panel">
+                <h3>Nuevo Insumo</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>ID</label><input type="number" id="s-id"></div>
+                    <div class="form-group"><label>Nombre</label><input type="text" id="s-nombre"></div>
+                    <div class="form-group"><label>Cantidad Inicial</label><input type="number" id="s-cantidad"></div>
+                    <div class="form-group"><label>Unidad</label><input type="text" id="s-unidad" placeholder="ej: metros"></div>
+                    <div class="form-group"><label>Stock Mínimo</label><input type="number" id="s-minimo" value="10"></div>
+                </div>
+                <button class="btn-success" onclick="crearStock()">Registrar Insumo</button>
+            </div>
+            <table>
+                <thead><tr><th>ID</th><th>Nombre</th><th>Cantidad</th><th>Unidad</th><th>Min.</th><th>Alertas</th><th>Acciones</th></tr></thead>
+                <tbody id="tbody-stock"></tbody>
+            </table>
+        </div>
+
+        <div id="sec-pedidos" class="seccion hidden">
+            
+            <div class="form-panel" style="background: #e9ecef; margin-bottom: 10px;">
+                <strong>Filtros:</strong>
+                <input type="number" id="filtro-cliente" placeholder="ID Cliente" style="width:100px; padding:5px;">
+                <select id="filtro-estado" style="padding:5px;">
+                    <option value="">Todos los Estados</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En preparación">En preparación</option>
+                    <option value="Listo">Listo</option>
+                    <option value="Entregado">Entregado</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+                <button class="btn-primary" onclick="cargarPedidos()">Buscar</button>
+            </div>
+
+            <div class="form-panel">
+                <h3 id="pedido-form-title">Nuevo Pedido</h3>
+                <input type="hidden" id="p-mode" value="create">
+                <input type="hidden" id="p-id" value="0">
+                <div class="form-row">
+                    <div class="form-group"><label>ID Cliente</label><input type="number" id="p-cliente"></div>
+                    <div class="form-group"><label>Descripción</label><input type="text" id="p-desc"></div>
+                    <div class="form-group"><label>Tipo Trabajo</label><input type="text" id="p-tipo"></div>
+                    <div class="form-group"><label>Fecha Estimada</label><input type="date" id="p-fecha"></div>
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label>Insumos a descontar (Formato JSON array: [{"insumo_id": 1, "cantidad": 5}])</label>
+                    <textarea id="p-insumos" rows="2">[]</textarea>
+                </div>
+                <button class="btn-success" onclick="guardarPedido()">Guardar Pedido</button>
+                <button class="btn-warning" onclick="resetFormPedido()">Limpiar</button>
+            </div>
+            <table>
+                <thead><tr><th>ID</th><th>Cliente ID</th><th>Descripción</th><th>Tipo</th><th>Estado</th><th>Pago</th><th>Acciones</th></tr></thead>
+                <tbody id="tbody-pedidos"></tbody>
+            </table>
+        </div>
+
+        <div id="sec-usuarios" class="seccion hidden">
+            <div class="form-panel">
+                <h3 id="user-form-title">Nuevo Usuario</h3>
+                <input type="hidden" id="u-mode" value="create">
+                <div class="form-row">
+                    <div class="form-group"><label>Username</label><input type="text" id="u-username"></div>
+                    <div class="form-group"><label>Password</label><input type="text" id="u-password"></div>
+                    <div class="form-group">
+                        <label>Rol</label>
+                        <select id="u-rol">
+                            <option value="Administrador">Administrador</option>
+                            <option value="Empleado">Empleado</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-success" onclick="guardarUsuario()">Guardar Usuario</button>
+                <button class="btn-warning" onclick="resetFormUsuario()">Limpiar</button>
+            </div>
+            <table>
+                <thead><tr><th>Username</th><th>Rol</th><th>Contraseña</th><th>Acciones</th></tr></thead>
+                <tbody id="tbody-usuarios"></tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const API = "http://127.0.0.1:8000";
+    let token = null;
+    let rol = null;
+
+    // --- UTILIDADES ---
+    function showMsg(text, type) {
+        const msg = document.getElementById('global-msg');
+        msg.innerText = text;
+        msg.className = `msg ${type}`;
+        setTimeout(() => msg.className = 'msg hidden', 4000);
+    }
+
+    async function fetchAPI(endpoint, method = "GET", body = null) {
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        
+        const options = { method, headers };
+        if (body) options.body = JSON.stringify(body);
+
+        try {
+            const res = await fetch(`${API}${endpoint}`, options);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || "Error en el servidor");
+            return data;
+        } catch (error) {
+            showMsg(error.message, "error");
+            throw error;
+        }
+    }
+
+    // --- NAVEGACIÓN Y AUTH ---
+    async function login() {
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        try {
+            const data = await fetchAPI('/login', 'POST', {username: user, password: pass});
+            token = data.token;
+            rol = data.rol;
+            
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+            document.getElementById('user-info').classList.remove('hidden');
+            document.getElementById('welcome-text').innerText = `Hola, ${data.usuario} (${rol})`;
+            
+            if (rol !== "Administrador") document.getElementById('tab-usuarios').style.display = 'none';
+            else document.getElementById('tab-usuarios').style.display = 'inline-block';
+
+            showTab('pedidos');
+        } catch (e) {}
+    }
+
+    function logout() {
+        token = null; rol = null;
+        document.getElementById('view-login').classList.remove('hidden');
+        document.getElementById('view-app').classList.add('hidden');
+        document.getElementById('user-info').classList.add('hidden');
+    }
+
+    function showTab(tab) {
+        document.querySelectorAll('.seccion').forEach(s => s.classList.add('hidden'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(`sec-${tab}`).classList.remove('hidden');
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        
+        if(tab === 'clientes') cargarClientes();
+        if(tab === 'stock') cargarStock();
+        if(tab === 'pedidos') cargarPedidos();
+        if(tab === 'usuarios') cargarUsuarios();
+    }
+
+    // --- CLIENTES ---
+    async function cargarClientes() {
+        const tbody = document.getElementById('tbody-clientes');
+        tbody.innerHTML = "<tr><td colspan='5'>Cargando...</td></tr>";
+        try {
+            const data = await fetchAPI('/clientes');
+            tbody.innerHTML = data.map(c => `
+                <tr>
+                    <td>${c.id}</td><td>${c.nombre}</td><td>${c.telefono}</td><td>${c.email || ''}</td>
+                    <td class="actions-cell">
+                        <button class="btn-primary" onclick="editarCliente(${c.id}, '${c.nombre}', '${c.telefono}', '${c.email || ''}')">✏️</button>
+                        <button class="btn-danger" onclick="eliminarCliente(${c.id})">🗑️</button>
+                    </td>
+                </tr>`).join('');
+        } catch (e) {}
+    }
+
+    async function guardarCliente() {
+        const id = parseInt(document.getElementById('c-id').value);
+        const body = {
+            id: id || 0,
+            nombre: document.getElementById('c-nombre').value,
+            telefono: document.getElementById('c-telefono').value,
+            email: document.getElementById('c-email').value || null
+        };
+        const mode = document.getElementById('c-mode').value;
+        try {
+            if (mode === 'create') await fetchAPI('/clientes', 'POST', body);
+            else await fetchAPI(`/clientes/${id}`, 'PUT', body);
+            showMsg("Cliente guardado", "success");
+            resetFormCliente();
+            cargarClientes();
+        } catch (e) {}
+    }
+
+    function editarCliente(id, nom, tel, email) {
+        document.getElementById('c-mode').value = 'edit';
+        document.getElementById('cliente-form-title').innerText = "Editar Cliente " + id;
+        document.getElementById('c-id').value = id;
+        document.getElementById('c-id').disabled = true;
+        document.getElementById('c-nombre').value = nom;
+        document.getElementById('c-telefono').value = tel;
+        document.getElementById('c-email').value = email;
+    }
+
+    async function eliminarCliente(id) {
+        if(!confirm(`¿Eliminar cliente ${id}?`)) return;
+        try { await fetchAPI(`/clientes/${id}`, 'DELETE'); showMsg("Eliminado", "success"); cargarClientes(); } catch (e) {}
+    }
+
+    function resetFormCliente() {
+        document.getElementById('c-mode').value = 'create';
+        document.getElementById('cliente-form-title').innerText = "Nuevo Cliente";
+        document.getElementById('c-id').disabled = false;
+        ['c-id','c-nombre','c-telefono','c-email'].forEach(id => document.getElementById(id).value = '');
+    }
+
+    // --- STOCK ---
+    async function cargarStock() {
+        const tbody = document.getElementById('tbody-stock');
+        try {
+            const res = await fetchAPI('/stock');
+            const data = res.stock;
+            const alertas = res.alertas.join(' | ');
+            if (alertas) showMsg(alertas, "warning");
+
+            tbody.innerHTML = data.map(s => `
+                <tr style="${s.cantidad <= s.stock_minimo ? 'background-color:#fff3cd;' : ''}">
+                    <td>${s.id}</td><td>${s.nombre}</td><td><b>${s.cantidad}</b></td><td>${s.unidad}</td><td>${s.stock_minimo}</td>
+                    <td>${s.cantidad <= s.stock_minimo ? '⚠️ Bajo' : 'OK'}</td>
+                    <td class="actions-cell">
+                        <button class="btn-success" onclick="reponerStock(${s.id})">+ Reponer</button>
+                        <button class="btn-warning" onclick="quitarStock(${s.id})">- Quitar</button>
+                    </td>
+                </tr>`).join('');
+        } catch (e) {}
+    }
+
+    async function crearStock() {
+        const body = {
+            id: parseInt(document.getElementById('s-id').value),
+            nombre: document.getElementById('s-nombre').value,
+            cantidad: parseInt(document.getElementById('s-cantidad').value),
+            unidad: document.getElementById('s-unidad').value,
+            stock_minimo: parseInt(document.getElementById('s-minimo').value)
+        };
+        try { await fetchAPI('/stock', 'POST', body); showMsg("Insumo creado", "success"); cargarStock(); } catch (e) {}
+    }
+
+    async function reponerStock(id) {
+        const cant = prompt("¿Cuántas unidades agregar?");
+        if(!cant || isNaN(cant)) return;
+        try { await fetchAPI(`/stock/${id}/reponer?cantidad=${cant}`, 'POST'); cargarStock(); } catch(e) {}
+    }
+
+    async function quitarStock(id) {
+        const cant = prompt("¿Cuántas unidades descontar manualmente?");
+        if(!cant || isNaN(cant)) return;
+        try { await fetchAPI(`/stock/${id}?cantidad=${cant}`, 'PUT'); cargarStock(); } catch(e) {}
+    }
+
+    // --- PEDIDOS ---
+    async function cargarPedidos() {
+        const cliente_id = document.getElementById('filtro-cliente').value;
+        const estado = document.getElementById('filtro-estado').value;
+        let url = '/pedidos?';
+        if(cliente_id) url += `cliente_id=${cliente_id}&`;
+        if(estado) url += `estado=${estado}`;
+
+        const tbody = document.getElementById('tbody-pedidos');
+        try {
+            const data = await fetchAPI(url);
+            tbody.innerHTML = data.map(p => `
+                <tr>
+                    <td>${p.id}</td><td>${p.cliente_id}</td><td>${p.descripcion}</td><td>${p.tipo_trabajo}</td>
+                    <td><span style="padding:3px; background:#e2e3e5; border-radius:3px;">${p.estado}</span></td>
+                    <td><b>${p.estado_pago}</b></td>
+                    <td class="actions-cell">
+                        <button class="btn-primary" onclick="estadoPedido(${p.id})">🔄 Estado</button>
+                        <button class="btn-success" onclick="pagoPedido(${p.id})">💰 Pago</button>
+                        <button class="btn-danger" onclick="cancelarPedido(${p.id})">❌ Cancelar</button>
+                        <button class="btn-warning" onclick="editarPedido(${p.id}, ${p.cliente_id}, '${p.descripcion}', '${p.tipo_trabajo}', '${p.fecha_estimada}')">✏️ Edit</button>
+                    </td>
+                </tr>`).join('');
+        } catch (e) {}
+    }
+
+    async function guardarPedido() {
+        const mode = document.getElementById('p-mode').value;
+        let insumosArray = [];
+        try { insumosArray = JSON.parse(document.getElementById('p-insumos').value); } 
+        catch (e) { return showMsg("Formato de insumos inválido. Debe ser un JSON válido", "error"); }
+
+        const body = {
+            id: parseInt(document.getElementById('p-id').value) || 0,
+            cliente_id: parseInt(document.getElementById('p-cliente').value),
+            descripcion: document.getElementById('p-desc').value,
+            tipo_trabajo: document.getElementById('p-tipo').value,
+            fecha_estimada: document.getElementById('p-fecha').value,
+            insumos: insumosArray
+        };
+        try {
+            if(mode === 'create') await fetchAPI('/pedidos', 'POST', body);
+            else await fetchAPI(`/pedidos/${body.id}`, 'PUT', body);
+            showMsg("Pedido guardado", "success");
+            resetFormPedido();
+            cargarPedidos();
+        } catch (e) {}
+    }
+
+    function editarPedido(id, cId, desc, tipo, fecha) {
+        document.getElementById('p-mode').value = 'edit';
+        document.getElementById('pedido-form-title').innerText = "Editar Pedido " + id;
+        document.getElementById('p-id').value = id;
+        document.getElementById('p-cliente').value = cId;
+        document.getElementById('p-desc').value = desc;
+        document.getElementById('p-tipo').value = tipo;
+        document.getElementById('p-fecha').value = fecha;
+        document.getElementById('p-insumos').value = "[]"; // simplificación
+    }
+
+    function resetFormPedido() {
+        document.getElementById('p-mode').value = 'create';
+        document.getElementById('pedido-form-title').innerText = "Nuevo Pedido";
+        ['p-id','p-cliente','p-desc','p-tipo','p-fecha'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('p-insumos').value = '[]';
+    }
+
+    async function estadoPedido(id) {
+        const st = prompt("Nuevo estado (En preparación, Listo, Entregado):");
+        if(!st) return;
+        try { await fetchAPI(`/pedidos/${id}/estado?nuevo_estado=${st}`, 'PUT'); cargarPedidos(); } catch(e){}
+    }
+
+    async function pagoPedido(id) {
+        const st = prompt("Estado de pago (Pagado, Pendiente):");
+        if(!st) return;
+        try { await fetchAPI(`/pedidos/${id}/estado_pago?nuevo_estado=${st}`, 'PUT'); cargarPedidos(); } catch(e){}
+    }
+
+    async function cancelarPedido(id) {
+        if(!confirm(`¿Cancelar pedido ${id}?`)) return;
+        try { await fetchAPI(`/pedidos/${id}`, 'DELETE'); cargarPedidos(); } catch(e){}
+    }
+
+    // --- USUARIOS (Admin) ---
+    async function cargarUsuarios() {
+        const tbody = document.getElementById('tbody-usuarios');
+        try {
+            const data = await fetchAPI('/usuarios');
+            tbody.innerHTML = data.map(u => `
+                <tr>
+                    <td>${u.username}</td><td>${u.rol}</td><td>***</td>
+                    <td class="actions-cell">
+                        <button class="btn-primary" onclick="editarUsuario('${u.username}', '${u.rol}')">✏️</button>
+                        <button class="btn-danger" onclick="eliminarUsuario('${u.username}')">🗑️</button>
+                    </td>
+                </tr>`).join('');
+        } catch (e) {}
+    }
+
+    async function guardarUsuario() {
+        const username = document.getElementById('u-username').value;
+        const body = {
+            username: username,
+            password: document.getElementById('u-password').value,
+            rol: document.getElementById('u-rol').value
+        };
+        const mode = document.getElementById('u-mode').value;
+        try {
+            if (mode === 'create') await fetchAPI('/usuarios', 'POST', body);
+            else await fetchAPI(`/usuarios/${username}`, 'PUT', body);
+            showMsg("Usuario guardado", "success");
+            resetFormUsuario();
+            cargarUsuarios();
+        } catch (e) {}
+    }
+
+    function editarUsuario(user, rol) {
+        document.getElementById('u-mode').value = 'edit';
+        document.getElementById('user-form-title').innerText = "Editar Usuario " + user;
+        document.getElementById('u-username').value = user;
+        document.getElementById('u-username').disabled = true; // El username funciona como ID, mejor no tocarlo
+        document.getElementById('u-rol').value = rol;
+    }
+
+    async function eliminarUsuario(user) {
+        if(!confirm(`¿Eliminar usuario ${user}?`)) return;
+        try { await fetchAPI(`/usuarios/${user}`, 'DELETE'); cargarUsuarios(); } catch(e) {}
+    }
+
+    function resetFormUsuario() {
+        document.getElementById('u-mode').value = 'create';
+        document.getElementById('user-form-title').innerText = "Nuevo Usuario";
+        document.getElementById('u-username').disabled = false;
+        ['u-username','u-password'].forEach(id => document.getElementById(id).value = '');
+    }
+
+</script>
+</body>
+</html>
