@@ -5,8 +5,26 @@ from auth import verificar_usuario
 
 router = APIRouter()
 
+@router.get("/usuarios", tags=["Usuarios"])
+def mostrar_usuarios(user = Depends(verificar_usuario)):
+    
+    if user.get("rol") != "Administrador":
+        raise HTTPException(
+            status_code=403, 
+            detail="Acceso denegado. Solo los administradores pueden ver la lista de usuarios."
+        )
+    
+    # usuarios_db es un diccionario, así que devolvemos solo sus valores en formato de lista
+    return list(usuarios_db.values())
+
 @router.post("/usuarios", tags=["Usuarios"])
 def agregar_usuario(usuario: Usuario, user = Depends(verificar_usuario)):
+    if user.get("rol") != "Administrador":
+        raise HTTPException(
+            status_code=403, 
+            detail="Acceso denegado. Solo los administradores pueden crear usuarios."
+        )
+
     if usuario.username in usuarios_db:
         raise HTTPException(status_code=400, detail="Usuario ya existe")
     
@@ -16,6 +34,12 @@ def agregar_usuario(usuario: Usuario, user = Depends(verificar_usuario)):
 
 @router.put("/usuarios/{username}", tags=["Usuarios"])
 def modificar_usuario(username: str, nuevo_usuario: Usuario, user = Depends(verificar_usuario)):
+    if user.get("rol") != "Administrador":
+        raise HTTPException(
+            status_code=403, 
+            detail="Acceso denegado. Solo los administradores pueden modificar usuarios."
+        )
+
     if username not in usuarios_db:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
@@ -25,6 +49,12 @@ def modificar_usuario(username: str, nuevo_usuario: Usuario, user = Depends(veri
 
 @router.delete("/usuarios/{username}", tags=["Usuarios"])
 def eliminar_usuario(username: str, user = Depends(verificar_usuario)):
+    if user.get("rol") != "Administrador":
+        raise HTTPException(
+            status_code=403, 
+            detail="Acceso denegado. Solo los administradores pueden eliminar usuarios."
+        )
+
     if username not in usuarios_db:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
