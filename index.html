@@ -185,11 +185,20 @@
     let rol = null;
 
     // --- UTILIDADES ---
+    let msgTimeout; // Variable global para controlar el temporizador
+
     function showMsg(text, type) {
         const msg = document.getElementById('global-msg');
         msg.innerText = text;
         msg.className = `msg ${type}`;
-        setTimeout(() => msg.className = 'msg hidden', 4000);
+        
+        // 1. Limpiamos temporizadores anteriores para que los mensajes no se borren antes de tiempo
+        if (msgTimeout) clearTimeout(msgTimeout);
+        
+        // 2. Le damos más tiempo a los errores (7 segundos) para poder leerlos tranquilos
+        const tiempo = (type === 'error') ? 7000 : 4000;
+        
+        msgTimeout = setTimeout(() => msg.className = 'msg hidden', tiempo);
     }
 
     async function fetchAPI(endpoint, method = "GET", body = null) {
@@ -202,7 +211,21 @@
         try {
             const res = await fetch(`${API}${endpoint}`, options);
             const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || "Error en el servidor");
+            
+            if (!res.ok) {
+                let errorText = "Error en el servidor";
+                
+                // 3. Traducimos el error de FastAPI para que sea texto legible
+                if (data.detail) {
+                    if (typeof data.detail === 'string') {
+                        errorText = data.detail;
+                    } else if (Array.isArray(data.detail)) {
+                        // Extraemos todos los mensajes de error y los unimos con comas
+                        errorText = data.detail.map(err => err.msg).join(" | ");
+                    }
+                }
+                throw new Error(errorText);
+            }
             return data;
         } catch (error) {
             showMsg(error.message, "error");

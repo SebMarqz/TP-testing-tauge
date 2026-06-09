@@ -15,15 +15,15 @@ cd TP_TESTING_TAUGE
 
 ---
 
-# 2. Crear entorno virtual (venv)
+## 2. Crear entorno virtual (venv)
 
-## Windows
+### Windows
 
 ```bash
 python -m venv venv
 ```
 
-## Linux / macOS
+### Linux / macOS
 
 ```bash
 python3 -m venv venv
@@ -31,15 +31,15 @@ python3 -m venv venv
 
 ---
 
-# 3. Activar entorno virtual
+## 3. Activar entorno virtual
 
-## Windows
+### Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-## Linux / macOS
+### Linux / macOS
 
 ```bash
 source venv/bin/activate
@@ -47,7 +47,7 @@ source venv/bin/activate
 
 ---
 
-# 4. Instalar dependencias
+## 4. Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
@@ -55,7 +55,7 @@ pip install -r requirements.txt
 
 ---
 
-# 5. Ejecutar la API REST
+## 5. Ejecutar la API REST
 
 ```bash
 cd restapi
@@ -70,19 +70,7 @@ http://127.0.0.1:8000
 
 ---
 
-# 6. Ejecutar el cliente de terminal
-
-Abrir una segunda terminal, activar nuevamente el venv y ejecutar:
-
-```bash
-python ClienteTerminal.py
-```
-
-El cliente de terminal se conectará automáticamente a la REST API mediante requests HTTP.
-
----
-
-# 7. Abrir Swagger
+## 6. Abrir Swagger
 
 Abrir en el navegador:
 
@@ -92,7 +80,7 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# 8. Login de prueba
+## 7. Login de prueba
 
 Usuario:
 
@@ -108,9 +96,9 @@ Contraseña:
 
 ---
 
-# 9. Autorizar endpoints
+## 8. Autorizar endpoints (Swagger)
 
-## Hacer login
+### Hacer login
 
 Endpoint:
 
@@ -129,11 +117,9 @@ Body:
 
 La API devuelve un token.
 
----
+### Usar token
 
-## Usar token
-
-En la sección de auth pegar el token recibido, por ejemplo:
+En la sección de auth de Swagger, pegar el token recibido, por ejemplo:
 
 ```text
 fake-token-admin
@@ -141,24 +127,24 @@ fake-token-admin
 
 ---
 
-# 10. Verificar integración terminal + API
+## 9. Ejecutar pruebas automatizadas (Selenium + Pytest)
 
-Con la API ejecutándose, usar el programa de terminal para:
+Para ejecutar los casos de prueba End-to-End (E2E) sobre la interfaz web, es necesario **tener la API REST en ejecución** (Paso 5) en una terminal.
 
-* Mostrar clientes
-* Agregar clientes
-* Buscar clientes
-* Modificar clientes
-* Eliminar clientes
+Abrir una **segunda terminal**, activar nuevamente el entorno virtual (Paso 3) y navegar a la carpeta de las pruebas:
 
-Mientras se usa el cliente de terminal, en la consola de uvicorn aparecerán requests como:
-
-```text
-POST /login
-GET /clientes
-POST /clientes
-PUT /clientes/1
-DELETE /clientes/1
+```bash
+cd Pruebas_Selenium
 ```
 
-Eso confirma que el programa de terminal está consumiendo la REST API correctamente.
+Para ejecutar todos los casos de prueba de la carpeta:
+
+```bash
+pytest
+```
+
+Para ejecutar un caso de prueba en específico (por ejemplo, el CP-01):
+
+```bash
+pytest CP-01.py
+```
