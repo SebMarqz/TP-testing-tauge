@@ -388,11 +388,22 @@
             tbody.innerHTML = data.map(p => `
                 <tr>
                     <td>${p.id}</td><td>${p.cliente_id}</td><td>${p.descripcion}</td><td>${p.tipo_trabajo}</td>
-                    <td><span style="padding:3px; background:#e2e3e5; border-radius:3px;">${p.estado}</span></td>
-                    <td><b>${p.estado_pago}</b></td>
+                    <td>
+                        <select onchange="cambiarEstadoPedido(${p.id}, this.value)" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="Pendiente" ${p.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="En preparacion" ${p.estado === 'En preparacion' ? 'selected' : ''}>En preparación</option>
+                            <option value="Listo" ${p.estado === 'Listo' ? 'selected' : ''}>Listo</option>
+                            <option value="Entregado" ${p.estado === 'Entregado' ? 'selected' : ''}>Entregado</option>
+                            <option value="Cancelado" ${p.estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select onchange="cambiarPagoPedido(${p.id}, this.value)" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="Pendiente" ${p.estado_pago === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="Pagado" ${p.estado_pago === 'Pagado' ? 'selected' : ''}>Pagado</option>
+                        </select>
+                    </td>
                     <td class="actions-cell">
-                        <button class="btn-primary" onclick="estadoPedido(${p.id})">🔄 Estado</button>
-                        <button class="btn-success" onclick="pagoPedido(${p.id})">💰 Pago</button>
                         <button class="btn-danger" onclick="cancelarPedido(${p.id})">❌ Cancelar</button>
                         <button class="btn-warning" onclick="editarPedido(${p.id}, ${p.cliente_id}, '${p.descripcion}', '${p.tipo_trabajo}', '${p.fecha_estimada}')">✏️ Edit</button>
                     </td>
@@ -441,16 +452,25 @@
         document.getElementById('p-insumos').value = '[]';
     }
 
-    async function estadoPedido(id) {
-        const st = prompt("Nuevo estado (En preparación, Listo, Entregado):");
-        if(!st) return;
-        try { await fetchAPI(`/pedidos/${id}/estado?nuevo_estado=${st}`, 'PUT'); cargarPedidos(); } catch(e){}
+    async function cambiarEstadoPedido(id, nuevoEstado) {
+        try { 
+            await fetchAPI(`/pedidos/${id}/estado?nuevo_estado=${nuevoEstado}`, 'PUT'); 
+            showMsg("Estado actualizado", "success");
+            cargarPedidos(); 
+        } catch(e) {
+            // Si la API rechaza el cambio (ej. transición inválida), recargamos para volver al valor anterior
+            cargarPedidos();
+        }
     }
 
-    async function pagoPedido(id) {
-        const st = prompt("Estado de pago (Pagado, Pendiente):");
-        if(!st) return;
-        try { await fetchAPI(`/pedidos/${id}/estado_pago?nuevo_estado=${st}`, 'PUT'); cargarPedidos(); } catch(e){}
+    async function cambiarPagoPedido(id, nuevoEstado) {
+        try { 
+            await fetchAPI(`/pedidos/${id}/estado_pago?nuevo_estado=${nuevoEstado}`, 'PUT'); 
+            showMsg("Pago actualizado", "success");
+            cargarPedidos(); 
+        } catch(e){
+            cargarPedidos();
+        }
     }
 
     async function cancelarPedido(id) {
