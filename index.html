@@ -121,11 +121,13 @@
                 <select id="filtro-estado" style="padding:5px;">
                     <option value="">Todos los Estados</option>
                     <option value="Pendiente">Pendiente</option>
-                    <option value="En preparación">En preparación</option>
+                    <option value="En preparacion">En preparación</option>
                     <option value="Listo">Listo</option>
                     <option value="Entregado">Entregado</option>
                     <option value="Cancelado">Cancelado</option>
                 </select>
+                <input type="date" id="filtro-fecha" style="padding:5px;" title="Buscar por fecha estimada">
+                
                 <button class="btn-primary" onclick="cargarPedidos()">Buscar</button>
             </div>
 
@@ -147,7 +149,7 @@
                 <button class="btn-warning" onclick="resetFormPedido()">Limpiar</button>
             </div>
             <table>
-                <thead><tr><th>ID</th><th>Cliente ID</th><th>Descripción</th><th>Tipo</th><th>Estado</th><th>Pago</th><th>Acciones</th></tr></thead>
+                <thead><tr><th>ID</th><th>Cliente ID</th><th>Descripción</th><th>Tipo</th><th>Fecha Estimada</th><th>Estado</th><th>Pago</th><th>Acciones</th></tr></thead>
                 <tbody id="tbody-pedidos"></tbody>
             </table>
         </div>
@@ -378,9 +380,16 @@
     async function cargarPedidos() {
         const cliente_id = document.getElementById('filtro-cliente').value;
         const estado = document.getElementById('filtro-estado').value;
-        let url = '/pedidos?';
-        if(cliente_id) url += `cliente_id=${cliente_id}&`;
-        if(estado) url += `estado=${estado}`;
+        const fecha = document.getElementById('filtro-fecha').value; // Nueva constante
+
+        // Se usa URLSearchParams para armar la URL dinámicamente y de forma segura
+        const params = new URLSearchParams();
+        if (cliente_id) params.append('cliente_id', cliente_id);
+        if (estado) params.append('estado', estado);
+        if (fecha) params.append('fecha_estimada', fecha); // Nuevo parámetro
+
+        const queryString = params.toString();
+        const url = queryString ? `/pedidos?${queryString}` : '/pedidos';
 
         const tbody = document.getElementById('tbody-pedidos');
         try {
@@ -388,7 +397,7 @@
             tbody.innerHTML = data.map(p => `
                 <tr>
                     <td>${p.id}</td><td>${p.cliente_id}</td><td>${p.descripcion}</td><td>${p.tipo_trabajo}</td>
-                    <td>
+                    <td>${p.fecha_estimada}</td> <td>
                         <select onchange="cambiarEstadoPedido(${p.id}, this.value)" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc;">
                             <option value="Pendiente" ${p.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
                             <option value="En preparacion" ${p.estado === 'En preparacion' ? 'selected' : ''}>En preparación</option>

@@ -16,7 +16,7 @@ ESTADOS_VALIDOS = {
 }
 
 @router.get("/pedidos", tags=["Pedidos"])
-def mostrar_pedidos(cliente_id: int = None, estado: str = None, user = Depends(verificar_usuario)):
+def mostrar_pedidos(cliente_id: int = None, estado: str = None, fecha_estimada: str = None, user = Depends(verificar_usuario)):
     # Iniciamos con todos los pedidos en memoria
     resultados = pedidos_db
     
@@ -25,6 +25,8 @@ def mostrar_pedidos(cliente_id: int = None, estado: str = None, user = Depends(v
         resultados = [p for p in resultados if p.cliente_id == cliente_id]
     if estado:
         resultados = [p for p in resultados if p.estado == estado]
+    if fecha_estimada:
+        resultados = [p for p in resultados if p.fecha_estimada == fecha_estimada]
         
     return resultados
 
